@@ -1,1 +1,1 @@
-# t3-chat-cloneathon
+# T3 Chat Cloneathon
