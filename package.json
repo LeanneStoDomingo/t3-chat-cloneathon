@@ -16,6 +16,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.21.0",
     "@t3-oss/env-nextjs": "^0.13.8",
     "convex": "^1.24.8",
     "next": "15.3.3",
