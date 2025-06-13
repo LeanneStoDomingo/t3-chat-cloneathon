@@ -4,6 +4,8 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ConvexClientProvider } from "./_providers/convex-provider";
 import { PostHogProvider } from "./_providers/posthog-provider";
+import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar";
+import { AppSidebar } from "~/components/app-sidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,7 +35,13 @@ export default function RootLayout({
       >
         <ClerkProvider>
           <ConvexClientProvider>
-            <PostHogProvider>{children}</PostHogProvider>
+            <PostHogProvider>
+              <SidebarProvider>
+                <AppSidebar />
+                <SidebarTrigger className="z-10 top-0 left-0 absolute" />
+                {children}
+              </SidebarProvider>
+            </PostHogProvider>
           </ConvexClientProvider>
         </ClerkProvider>
       </body>

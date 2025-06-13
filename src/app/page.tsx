@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Authenticated, Unauthenticated, useAction } from "convex/react";
-import { SignInButton, UserButton } from "@clerk/nextjs";
+import { Authenticated, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -16,17 +15,9 @@ import {
 
 export default function Home() {
   return (
-    <>
-      <Authenticated>
-        <UserButton />
-        <Content />
-      </Authenticated>
-      <Unauthenticated>
-        <SignInButton>
-          <Button>Sign In</Button>
-        </SignInButton>
-      </Unauthenticated>
-    </>
+    <Authenticated>
+      <Content />
+    </Authenticated>
   );
 }
 
@@ -57,25 +48,27 @@ function Content() {
   };
 
   return (
-    <div>
-      <form onSubmit={onSubmit}>
-        <Input name="prompt" />
-        <Select name="model" defaultValue="gemini">
-          <SelectTrigger>
-            <SelectValue placeholder="Model" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="gemini">Gemini 2.0 Flash</SelectItem>
-            <SelectItem value="deepseek">DeepSeek V3 0324</SelectItem>
-          </SelectContent>
-        </Select>
-        <Button type="submit">Send</Button>
-      </form>
+    <div className="w-full">
       <div>
         {messages.map((t, i) => (
           <div key={i}>{t}</div>
         ))}
       </div>
+      <form onSubmit={onSubmit} className="flex flex-col p-8 gap-4">
+        <Input name="prompt" className="grow " />
+        <div className="flex justify-between">
+          <Select name="model" defaultValue="gemini">
+            <SelectTrigger>
+              <SelectValue placeholder="Model" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="gemini">Gemini 2.0 Flash</SelectItem>
+              <SelectItem value="deepseek">DeepSeek V3 0324</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button type="submit">Send</Button>
+        </div>
+      </form>
     </div>
   );
 }

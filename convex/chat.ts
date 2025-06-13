@@ -1,7 +1,8 @@
 import { v } from "convex/values";
+import { paginationOptsValidator } from "convex/server";
 import { Agent } from "@convex-dev/agent";
 import { components } from "./_generated/api";
-import { action } from "./_generated/server";
+import { action, query } from "./_generated/server";
 import { google } from "@ai-sdk/google";
 import { openrouter } from "@openrouter/ai-sdk-provider";
 
@@ -19,6 +20,23 @@ const openRouterChatAgent = new Agent(components.agent, {
     "You are an AI chat assistant bot using the `deepseek/deepseek-chat-v3-0324:free` model",
 });
 
+export const listThreads = query({
+  args: {
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.auth.getUserIdentity();
+    if (!user) throw new Error("Unauthenticated");
+
+    const threads = await ctx.runQuery(
+      components.agent.threads.listThreadsByUserId,
+      { userId: user.tokenIdentifier, paginationOpts: args.paginationOpts }
+    );
+
+    return threads;
+  },
+});
+
 export const createThread = action({
   args: {
     prompt: v.string(),
@@ -26,7 +44,7 @@ export const createThread = action({
   },
   handler: async (ctx, args) => {
     const user = await ctx.auth.getUserIdentity();
-    if (!user) throw new Error("User is not authenticated");
+    if (!user) throw new Error("Unauthenticated");
 
     const chatAgent =
       args.model === "gemini" ? geminiChatAgent : openRouterChatAgent;
@@ -35,6 +53,12 @@ export const createThread = action({
       userId: user.tokenIdentifier,
     });
     const result = await thread.generateText({ prompt: args.prompt });
+
+    const title = await thread.generateText(
+      { prompt: "Generate a single title for this thread in plain text" },
+      { storageOptions: { saveMessages: "none" } }
+    );
+    await thread.updateMetadata({ title: title.text });
 
     return { threadId, text: result.text };
   },
@@ -48,12 +72,11 @@ export const continueThread = action({
   },
   handler: async (ctx, args) => {
     const user = await ctx.auth.getUserIdentity();
-    if (!user) throw new Error("User is not authenticated");
+    if (!user) throw new Error("Unauthenticated");
 
     const chatAgent =
       args.model === "gemini" ? geminiChatAgent : openRouterChatAgent;
 
-    // This includes previous message history from the thread automatically.
     const { thread } = await chatAgent.continueThread(ctx, {
       threadId: args.threadId,
       userId: user.tokenIdentifier,
