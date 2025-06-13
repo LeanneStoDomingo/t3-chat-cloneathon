@@ -6,6 +6,8 @@ export const env = createEnv({
     NODE_ENV: z.enum(["development", "test", "production"]),
     CONVEX_DEPLOYMENT: z.string(),
     CLERK_SECRET_KEY: z.string(),
+    GOOGLE_GENERATIVE_AI_API_KEY: z.string(),
+    OPENROUTER_API_KEY: z.string(),
   },
   client: {
     NEXT_PUBLIC_CONVEX_URL: z.string().url(),
