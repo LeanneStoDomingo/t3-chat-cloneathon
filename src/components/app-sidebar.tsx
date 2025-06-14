@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { SignInButton, UserButton } from "@clerk/nextjs";
 import { api } from "../../convex/_generated/api";
 import {
@@ -30,6 +31,13 @@ export function AppSidebar() {
           <span className="text-center">Sign in to chat</span>
         </Unauthenticated>
         <Authenticated>
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <Button className="w-full" asChild>
+                <Link href="/">New Chat</Link>
+              </Button>
+            </SidebarGroupContent>
+          </SidebarGroup>
           <ChatGroup />
         </Authenticated>
       </SidebarContent>
@@ -62,7 +70,7 @@ function ChatGroup() {
           {threads.results.map((thread) => (
             <SidebarMenuItem key={thread._id}>
               <SidebarMenuButton asChild>
-                <span>{thread.title}</span>
+                <Link href={`/chat/${thread._id}`}>{thread.title}</Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
