@@ -15,7 +15,7 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     } else {
       posthog.reset();
     }
-  }, [posthog, userInfo.user]);
+  }, [userInfo.user]);
 
   return children;
 }

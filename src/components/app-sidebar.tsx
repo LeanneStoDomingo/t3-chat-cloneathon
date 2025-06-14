@@ -1,7 +1,7 @@
 "use client";
 
 import { SignInButton, UserButton } from "@clerk/nextjs";
-import { api } from "convex/_generated/api";
+import { api } from "../../convex/_generated/api";
 import {
   Authenticated,
   Unauthenticated,
