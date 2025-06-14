@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { SignInButton, UserButton } from "@clerk/nextjs";
 import { api } from "../../convex/_generated/api";
 import {
@@ -20,7 +21,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "~/components/ui/sidebar";
-import { Button } from "./ui/button";
+import { Button } from "~/components/ui/button";
+import { cn } from "~/lib/utils";
 
 export function AppSidebar() {
   return (
@@ -56,6 +58,8 @@ export function AppSidebar() {
 }
 
 function ChatGroup() {
+  const params = useParams<{ threadId: string }>();
+
   const threads = usePaginatedQuery(
     api.chat.listThreads,
     {},
@@ -69,7 +73,13 @@ function ChatGroup() {
         <SidebarMenu>
           {threads.results.map((thread) => (
             <SidebarMenuItem key={thread._id}>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton
+                asChild
+                className={cn(
+                  params.threadId === thread._id &&
+                    "bg-neutral-200 hover:bg-neutral-200"
+                )}
+              >
                 <Link href={`/chat/${thread._id}`}>{thread.title}</Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

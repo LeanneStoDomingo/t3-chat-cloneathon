@@ -37,6 +37,22 @@ export const listThreads = query({
   },
 });
 
+export const listThreadMessages = query({
+  args: {
+    threadId: v.string(),
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.auth.getUserIdentity();
+    if (!user) throw new Error("Unauthenticated");
+
+    return await geminiChatAgent.listMessages(ctx, {
+      threadId: args.threadId,
+      paginationOpts: args.paginationOpts,
+    });
+  },
+});
+
 export const createThread = action({
   args: {
     prompt: v.string(),
