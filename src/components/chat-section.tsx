@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAction } from "convex/react";
 import { useThreadMessages, toUIMessages } from "@convex-dev/agent/react";
 import { api } from "../../convex/_generated/api";
+import Markdown from "markdown-to-jsx";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
@@ -93,7 +94,7 @@ function ChatMessages(props: { threadId: string; model: TChatModels }) {
             m.role === "user" && "bg-neutral-100 ml-auto rounded-lg"
           )}
         >
-          {m.content}
+          <Markdown>{m.content}</Markdown>
         </div>
       ))}
     </div>

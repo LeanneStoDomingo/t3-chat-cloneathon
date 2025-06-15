@@ -38,7 +38,7 @@ export default function RootLayout({
             <PostHogProvider>
               <SidebarProvider>
                 <AppSidebar />
-                <SidebarTrigger className="z-10 top-0 left-0 absolute" />
+                <SidebarTrigger className="z-10 top-0 left-0 fixed" />
                 {children}
               </SidebarProvider>
             </PostHogProvider>

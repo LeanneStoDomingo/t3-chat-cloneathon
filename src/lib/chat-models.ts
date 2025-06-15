@@ -6,32 +6,32 @@ import { openrouter } from "@openrouter/ai-sdk-provider";
 
 export const vChatModels = v.union(v.literal("gemini"), v.literal("deepseek"));
 
+function getInstructions(model: string) {
+  return `You are an AI chat assistant bot using the "${model}" model. Format your response in markdown`;
+}
+
 export const models = {
   gemini: {
     name: "Gemini 2.0 Flash",
-    value: "gemini",
     agent: new Agent(components.agent, {
       chat: google.chat("gemini-2.0-flash"),
       name: "Gemini Chat Agent",
-      instructions:
-        "You are an AI chat assistant bot using the `gemini-2.0-flash` model",
+      instructions: getInstructions("gemini-2.0-flash"),
     }),
   },
   deepseek: {
     name: "DeepSeek V3 0324",
-    value: "deepseek",
     agent: new Agent(components.agent, {
       chat: openrouter.chat("deepseek/deepseek-chat-v3-0324:free"),
       name: "DeepSeek Chat Agent",
-      instructions:
-        "You are an AI chat assistant bot using the `deepseek-chat-v3-0324` model",
+      instructions: getInstructions("deepseek-chat-v3-0324"),
     }),
   },
 };
 
-export const modelStrings = Object.values(models).map((m) => ({
-  name: m.name,
-  value: m.value,
+export const modelStrings = Object.entries(models).map(([k, v]) => ({
+  name: v.name,
+  value: k,
 }));
 
 export type TChatModels = keyof typeof models;
