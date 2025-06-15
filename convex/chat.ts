@@ -1,7 +1,7 @@
 import { v } from "convex/values";
-import { paginationOptsValidator, type UserIdentity } from "convex/server";
+import { paginationOptsValidator } from "convex/server";
 import type { ToolSet } from "ai";
-import type { Thread } from "@convex-dev/agent";
+import { vStreamArgs, type Thread } from "@convex-dev/agent";
 import { components, internal } from "./_generated/api";
 import {
   query,
@@ -37,41 +37,57 @@ export const listThreads = query({
   },
 });
 
+function getModelAgent(model: TChatModels) {
+  return models[model].agent;
+}
+
 export const listThreadMessages = query({
   args: {
     threadId: v.string(),
     model: vChatModels,
     paginationOpts: paginationOptsValidator,
+    streamArgs: vStreamArgs,
   },
   handler: async (ctx, args) => {
     // const user = await getUserOrThrow(ctx);
 
     // TODO: make sure user owns thread
 
-    return await models[args.model].agent.listMessages(ctx, {
+    const agent = getModelAgent(args.model);
+
+    const messages = await agent.listMessages(ctx, {
       threadId: args.threadId,
       paginationOpts: args.paginationOpts,
     });
+
+    const streams = await agent.syncStreams(ctx, {
+      threadId: args.threadId,
+      streamArgs: args.streamArgs,
+    });
+
+    return { ...messages, streams };
   },
 });
 
 async function getThread(
   ctx: ActionCtx,
-  user: UserIdentity,
+  userId: string,
   model: TChatModels,
   threadId: string | null
 ) {
+  const agent = getModelAgent(model);
+
   if (!threadId) {
-    const { thread } = await models[model].agent.createThread(ctx, {
-      userId: user.tokenIdentifier,
+    const { thread } = await agent.createThread(ctx, {
+      userId,
       title: NEW_THREAD_TITLE,
     });
     return thread;
   }
 
-  const { thread } = await models[model].agent.continueThread(ctx, {
+  const { thread } = await agent.continueThread(ctx, {
     threadId,
-    userId: user.tokenIdentifier,
+    userId,
   });
   return thread;
 }
@@ -83,18 +99,22 @@ export const generateThreadTitle = internalAction({
     model: vChatModels,
   },
   handler: async (ctx, args) => {
-    const { thread } = await models[args.model].agent.continueThread(ctx, {
+    const agent = getModelAgent(args.model);
+
+    const { thread } = await agent.continueThread(ctx, {
       threadId: args.threadId,
       userId: args.userId,
     });
 
     const title = await thread.generateText(
       {
-        prompt:
-          "Generate a single title for this thread in plain text. The title should be no more than 35 characters long. Strip the ends of whitespace and don't include quotes",
+        prompt: `Generate a single title for this thread in plain text. 
+          The title should be no more than 35 characters long. 
+          Strip the ends of whitespace and don't include quotes`,
       },
       { storageOptions: { saveMessages: "none" } }
     );
+
     await thread.updateMetadata({ title: title.text });
   },
 });
@@ -115,6 +135,26 @@ async function updateThreadTitle(
   });
 }
 
+export const streamMessage = internalAction({
+  args: {
+    userId: v.string(),
+    model: vChatModels,
+    threadId: v.string(),
+    prompt: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const thread = await getThread(ctx, args.userId, args.model, args.threadId);
+
+    const result = await thread.streamText(
+      { prompt: args.prompt },
+      { saveStreamDeltas: true }
+    );
+
+    await result.consumeStream();
+    await updateThreadTitle(ctx, thread, args.userId, args.model);
+  },
+});
+
 export const sendMessage = action({
   args: {
     prompt: v.string(),
@@ -124,12 +164,20 @@ export const sendMessage = action({
   handler: async (ctx, args) => {
     const user = await getUserOrThrow(ctx);
 
-    const thread = await getThread(ctx, user, args.model, args.threadId);
+    const thread = await getThread(
+      ctx,
+      user.tokenIdentifier,
+      args.model,
+      args.threadId
+    );
 
-    const result = await thread.generateText({ prompt: args.prompt });
+    await ctx.scheduler.runAfter(0, internal.chat.streamMessage, {
+      prompt: args.prompt,
+      model: args.model,
+      threadId: thread.threadId,
+      userId: user.tokenIdentifier,
+    });
 
-    await updateThreadTitle(ctx, thread, user.tokenIdentifier, args.model);
-
-    return { threadId: thread.threadId, text: result.text };
+    return { threadId: thread.threadId };
   },
 });

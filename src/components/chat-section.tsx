@@ -78,7 +78,7 @@ function ChatMessages(props: { threadId: string; model: TChatModels }) {
   const messages = useThreadMessages(
     api.chat.listThreadMessages,
     { threadId: props.threadId, model: props.model },
-    { initialNumItems: 10 }
+    { initialNumItems: 10, stream: true }
   );
 
   if (messages.results.length === 0) return;
