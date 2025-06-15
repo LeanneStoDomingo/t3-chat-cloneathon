@@ -5,6 +5,7 @@ import { vStreamArgs, type Thread } from "@convex-dev/agent";
 import { components, internal } from "./_generated/api";
 import {
   query,
+  mutation,
   action,
   internalAction,
   type QueryCtx,
@@ -179,5 +180,32 @@ export const sendMessage = action({
     });
 
     return { threadId: thread.threadId };
+  },
+});
+
+export const archiveThread = mutation({
+  args: {
+    threadId: v.string(),
+    status: v.union(v.literal("archived"), v.literal("active")),
+  },
+  handler: async (ctx, args) => {
+    await ctx.runMutation(components.agent.threads.updateThread, {
+      threadId: args.threadId,
+      patch: { status: args.status },
+    });
+  },
+});
+
+export const deleteThread = mutation({
+  args: {
+    threadId: v.string(),
+    cursor: v.optional(v.string()),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.runMutation(
+      components.agent.threads.deleteAllForThreadIdAsync,
+      args
+    );
   },
 });
