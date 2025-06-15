@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { paginationOptsValidator } from "convex/server";
+import { paginationOptsValidator, type UserIdentity } from "convex/server";
 import type { ToolSet } from "ai";
 import type { Thread } from "@convex-dev/agent";
 import { components, internal } from "./_generated/api";
@@ -55,6 +55,27 @@ export const listThreadMessages = query({
   },
 });
 
+async function getThread(
+  ctx: ActionCtx,
+  user: UserIdentity,
+  model: TChatModels,
+  threadId: string | null
+) {
+  if (!threadId) {
+    const { thread } = await models[model].agent.createThread(ctx, {
+      userId: user.tokenIdentifier,
+      title: NEW_THREAD_TITLE,
+    });
+    return thread;
+  }
+
+  const { thread } = await models[model].agent.continueThread(ctx, {
+    threadId,
+    userId: user.tokenIdentifier,
+  });
+  return thread;
+}
+
 export const generateThreadTitle = internalAction({
   args: {
     threadId: v.string(),
@@ -94,46 +115,21 @@ async function updateThreadTitle(
   });
 }
 
-export const createThread = action({
+export const sendMessage = action({
   args: {
     prompt: v.string(),
     model: vChatModels,
+    threadId: v.union(v.string(), v.null()),
   },
   handler: async (ctx, args) => {
     const user = await getUserOrThrow(ctx);
 
-    const { threadId, thread } = await models[args.model].agent.createThread(
-      ctx,
-      {
-        userId: user.tokenIdentifier,
-        title: NEW_THREAD_TITLE,
-      }
-    );
+    const thread = await getThread(ctx, user, args.model, args.threadId);
+
     const result = await thread.generateText({ prompt: args.prompt });
 
     await updateThreadTitle(ctx, thread, user.tokenIdentifier, args.model);
 
-    return { threadId, text: result.text };
-  },
-});
-
-export const continueThread = action({
-  args: {
-    prompt: v.string(),
-    threadId: v.string(),
-    model: vChatModels,
-  },
-  handler: async (ctx, args) => {
-    const user = await getUserOrThrow(ctx);
-
-    const { thread } = await models[args.model].agent.continueThread(ctx, {
-      threadId: args.threadId,
-      userId: user.tokenIdentifier,
-    });
-    const result = await thread.generateText({ prompt: args.prompt });
-
-    await updateThreadTitle(ctx, thread, user.tokenIdentifier, args.model);
-
-    return result.text;
+    return { threadId: thread.threadId, text: result.text };
   },
 });

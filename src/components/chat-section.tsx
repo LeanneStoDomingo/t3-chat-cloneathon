@@ -22,8 +22,7 @@ export function ChatSection(props: { threadId: string | null }) {
 
   const [model, setModel] = useState<TChatModels>("gemini");
 
-  const createThread = useAction(api.chat.createThread);
-  const continueThread = useAction(api.chat.continueThread);
+  const sendMessage = useAction(api.chat.sendMessage);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -33,13 +32,12 @@ export function ChatSection(props: { threadId: string | null }) {
 
     e.currentTarget.reset();
 
-    if (!props.threadId) {
-      void createThread({ model, prompt }).then((t) => {
-        router.push(`/chat/${t.threadId}`);
-      });
-    } else {
-      void continueThread({ model, prompt, threadId: props.threadId });
-    }
+    void sendMessage({ model, prompt, threadId: props.threadId }).then(
+      (data) => {
+        if (props.threadId) return;
+        router.push(`/chat/${data.threadId}`);
+      }
+    );
   };
 
   return (
@@ -51,7 +49,7 @@ export function ChatSection(props: { threadId: string | null }) {
         onSubmit={onSubmit}
         className="flex flex-col p-8 gap-4 bottom-0 mt-auto"
       >
-        <Input name="prompt" className="grow" />
+        <Input name="prompt" className="grow" autoComplete="off" />
         <div className="flex justify-between">
           <Select
             name="model"
