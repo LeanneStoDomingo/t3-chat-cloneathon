@@ -7,7 +7,9 @@ import { openrouter } from "@openrouter/ai-sdk-provider";
 export const vChatModels = v.union(v.literal("gemini"), v.literal("deepseek"));
 
 function getInstructions(model: string) {
-  return `You are an AI chat assistant bot using the "${model}" model. Format your response in markdown`;
+  return `You are an AI chat assistant bot using the "${model}" model. 
+  Format your response in markdown. 
+  If using code blocks, prefer plain text over putting comments in code block unless they are inline comments`;
 }
 
 export const models = {

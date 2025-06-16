@@ -6,6 +6,9 @@ import { useAction } from "convex/react";
 import { useThreadMessages, toUIMessages } from "@convex-dev/agent/react";
 import { api } from "../../convex/_generated/api";
 import Markdown from "markdown-to-jsx";
+import SyntaxHighlighter from "react-syntax-highlighter";
+import { vs } from "react-syntax-highlighter/dist/esm/styles/hljs";
+import { ClipboardIcon, ClipboardCheckIcon } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
@@ -15,6 +18,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
+import typography from "~/components/ui/typography";
+import { useCopyToClipboard } from "~/hooks/use-copy-to-clipboard";
 import { modelStrings, type TChatModels } from "~/lib/chat-models";
 import { cn } from "~/lib/utils";
 
@@ -94,9 +104,83 @@ function ChatMessages(props: { threadId: string; model: TChatModels }) {
             m.role === "user" && "bg-neutral-100 ml-auto rounded-lg"
           )}
         >
-          <Markdown>{m.content}</Markdown>
+          <Markdown
+            options={{
+              overrides: {
+                code: { component: MarkdownToSyntaxHighlighter },
+                h1: { props: { className: typography.h1 } },
+                h2: { props: { className: typography.h2 } },
+                h3: { props: { className: typography.h3 } },
+                h4: { props: { className: typography.h4 } },
+                p: { props: { className: typography.p } },
+                ul: { props: { className: typography.ul } },
+                blockquote: { props: { classname: typography.blockquote } },
+              },
+            }}
+          >
+            {m.content}
+          </Markdown>
         </div>
       ))}
+    </div>
+  );
+}
+
+function MarkdownToSyntaxHighlighter({
+  className,
+  children,
+  ...props
+}: Omit<React.ComponentProps<"code">, "children"> & {
+  children: string | string[];
+}) {
+  const { copiedText, copyToClipboard } = useCopyToClipboard();
+
+  const language = className
+    ?.split(" ")
+    ?.find((text) => text.startsWith("lang-"))
+    ?.replace("lang-", "");
+
+  const flatChildren = [children].flat(2).join(" ");
+
+  if (!language)
+    return (
+      <code className={cn(className, typography.code)} {...props}>
+        {flatChildren}
+      </code>
+    );
+
+  return (
+    <div className="bg-neutral-100 p-2 rounded-md my-2">
+      <div className="flex items-center justify-between pb-2">
+        <div className="p-1">{language}</div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              onClick={() => void copyToClipboard(flatChildren)}
+              variant="ghost"
+              size="icon"
+              className="hover:bg-neutral-200"
+            >
+              {!copiedText && <ClipboardIcon />}
+              {!!copiedText && <ClipboardCheckIcon />}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Copy to Clipboard</p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+      <SyntaxHighlighter
+        language={language}
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        style={vs}
+        customStyle={{
+          backgroundColor: "var(--color-neutral-50)",
+          borderRadius: "calc(var(--radius)",
+        }}
+      >
+        {children}
+      </SyntaxHighlighter>
     </div>
   );
 }

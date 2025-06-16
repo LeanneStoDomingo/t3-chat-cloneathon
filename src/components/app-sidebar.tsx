@@ -98,7 +98,7 @@ function ChatGroup() {
               <SidebarMenuButton
                 asChild
                 className={cn(
-                  "text-nowrap",
+                  "truncate",
                   params.threadId === thread._id &&
                     "bg-neutral-200 hover:bg-neutral-200"
                 )}
