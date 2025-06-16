@@ -38,6 +38,20 @@ export const listThreads = query({
   },
 });
 
+export const checkIfThreadExists = query({
+  args: { threadId: v.string() },
+  handler: async (ctx, args) => {
+    try {
+      const thread = await ctx.runQuery(components.agent.threads.getThread, {
+        threadId: args.threadId,
+      });
+      return !!thread;
+    } catch {
+      return false;
+    }
+  },
+});
+
 function getModelAgent(model: TChatModels) {
   return models[model].agent;
 }
