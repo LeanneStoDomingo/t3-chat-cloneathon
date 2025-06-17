@@ -39,8 +39,10 @@
     "posthog-js": "^1.250.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-mdr": "^0.1.5",
     "react-syntax-highlighter": "^15.6.1",
     "tailwind-merge": "^3.3.1",
+    "typewriter-effect": "^2.22.0",
     "zod": "^3.25.62"
   },
   "devDependencies": {
