@@ -7,7 +7,10 @@ import { useThreadMessages, toUIMessages } from "@convex-dev/agent/react";
 import { api } from "../../convex/_generated/api";
 import Markdown from "markdown-to-jsx";
 import SyntaxHighlighter from "react-syntax-highlighter";
-import { vs } from "react-syntax-highlighter/dist/esm/styles/hljs";
+import {
+  vs,
+  stackoverflowDark,
+} from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { ClipboardIcon, ClipboardCheckIcon } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -27,6 +30,7 @@ import typography from "~/components/ui/typography";
 import { useCopyToClipboard } from "~/hooks/use-copy-to-clipboard";
 import { modelStrings, type TChatModels } from "~/lib/chat-models";
 import { cn } from "~/lib/utils";
+import { useTheme } from "next-themes";
 
 export function ChatSection(props: { threadId: string | null }) {
   const router = useRouter();
@@ -101,7 +105,8 @@ function ChatMessages(props: { threadId: string; model: TChatModels }) {
           key={m.key}
           className={cn(
             "p-4",
-            m.role === "user" && "bg-neutral-100 ml-auto rounded-lg"
+            m.role === "user" &&
+              "bg-neutral-100 ml-auto rounded-lg dark:bg-neutral-800"
           )}
         >
           <Markdown
@@ -133,6 +138,7 @@ function MarkdownToSyntaxHighlighter({
 }: Omit<React.ComponentProps<"code">, "children"> & {
   children: string | string[];
 }) {
+  const { theme } = useTheme();
   const { copiedText, copyToClipboard } = useCopyToClipboard();
 
   const language = className
@@ -150,7 +156,7 @@ function MarkdownToSyntaxHighlighter({
     );
 
   return (
-    <div className="bg-neutral-100 p-2 rounded-md my-2">
+    <div className="bg-neutral-100 p-2 rounded-md my-2 dark:dark:bg-neutral-800">
       <div className="flex items-center justify-between pb-2">
         <div className="p-1">{language}</div>
         <Tooltip>
@@ -172,10 +178,8 @@ function MarkdownToSyntaxHighlighter({
       </div>
       <SyntaxHighlighter
         language={language}
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        style={vs}
+        style={theme === "light" ? vs : stackoverflowDark}
         customStyle={{
-          backgroundColor: "var(--color-neutral-50)",
           borderRadius: "calc(var(--radius)",
         }}
       >

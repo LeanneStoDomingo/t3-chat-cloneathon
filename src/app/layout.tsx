@@ -6,6 +6,8 @@ import { ConvexClientProvider } from "./_providers/convex-provider";
 import { PostHogProvider } from "./_providers/posthog-provider";
 import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar";
 import { AppSidebar } from "~/components/app-sidebar";
+import { ThemeProvider } from "./_providers/theme-provider";
+import { ThemeToggle } from "~/components/theme-toggle";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,21 +31,29 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ClerkProvider>
-          <ConvexClientProvider>
-            <PostHogProvider>
-              <SidebarProvider>
-                <AppSidebar />
-                <SidebarTrigger className="z-10 top-0 left-0 fixed" />
-                {children}
-              </SidebarProvider>
-            </PostHogProvider>
-          </ConvexClientProvider>
-        </ClerkProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ClerkProvider>
+            <ConvexClientProvider>
+              <PostHogProvider>
+                <SidebarProvider>
+                  <AppSidebar />
+                  <SidebarTrigger className="z-10 top-0 left-0 fixed" />
+                  {children}
+                  <ThemeToggle className="fixed top-0 right-0" />
+                </SidebarProvider>
+              </PostHogProvider>
+            </ConvexClientProvider>
+          </ClerkProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

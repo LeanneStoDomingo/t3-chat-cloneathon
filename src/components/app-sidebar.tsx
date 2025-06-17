@@ -100,7 +100,7 @@ function ChatGroup() {
                 className={cn(
                   "truncate",
                   params.threadId === thread._id &&
-                    "bg-neutral-200 hover:bg-neutral-200"
+                    "bg-neutral-200 hover:bg-neutral-200 dark:bg-neutral-700 dark:hover:bg-neutral-700"
                 )}
               >
                 <Link href={`/chat/${thread._id}`}>{thread.title}</Link>
