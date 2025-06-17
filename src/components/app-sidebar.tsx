@@ -39,6 +39,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { useIsMobile } from "~/hooks/use-mobile";
 import { cn } from "~/lib/utils";
+import { useTheme } from "next-themes";
 
 export function AppSidebar() {
   return (
@@ -78,6 +79,7 @@ function ChatGroup() {
   const router = useRouter();
 
   const isMobile = useIsMobile();
+  const { theme } = useTheme();
 
   const archiveThread = useMutation(api.chat.archiveThread);
   const deleteThread = useMutation(api.chat.deleteThread);
@@ -100,7 +102,9 @@ function ChatGroup() {
                 className={cn(
                   "truncate",
                   params.threadId === thread._id &&
-                    "bg-neutral-200 hover:bg-neutral-200 dark:bg-neutral-700 dark:hover:bg-neutral-700"
+                    (theme !== "matrix"
+                      ? "bg-neutral-200 hover:bg-neutral-200 dark:bg-neutral-700 dark:hover:bg-neutral-700"
+                      : "hover:bg-[var(--sidebar-foreground)] text-black font-light  bg-[var(--sidebar-foreground)]")
                 )}
               >
                 <Link href={`/chat/${thread._id}`}>{thread.title}</Link>

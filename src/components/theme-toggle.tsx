@@ -5,7 +5,7 @@ import {
   MoonIcon,
   SunIcon,
   CheckIcon,
-  PillIcon,
+  RabbitIcon,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -65,8 +65,8 @@ export function ThemeToggle({ className }: { className?: string }) {
       </ContextMenuTrigger>
       <ContextMenuContent>
         <ContextMenuItem>
-          <PillIcon color="red" />
-          <span>Matrix Mode</span>
+          <RabbitIcon color="gray" fill="white" />
+          <span>Wake up...</span>
           <Switch
             checked={theme === "matrix"}
             onCheckedChange={(e) => setTheme(e ? "matrix" : "system")}

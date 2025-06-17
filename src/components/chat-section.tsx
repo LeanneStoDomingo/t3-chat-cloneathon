@@ -138,7 +138,7 @@ function MarkdownToSyntaxHighlighter({
 }: Omit<React.ComponentProps<"code">, "children"> & {
   children: string | string[];
 }) {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const { copiedText, copyToClipboard } = useCopyToClipboard();
 
   const language = className
@@ -156,7 +156,14 @@ function MarkdownToSyntaxHighlighter({
     );
 
   return (
-    <div className="bg-neutral-100 p-2 rounded-md my-2 dark:dark:bg-neutral-800">
+    <div
+      className={cn(
+        "p-2 rounded-md my-2",
+        resolvedTheme !== "matrix"
+          ? "bg-neutral-100 dark:bg-neutral-800"
+          : "bg-neutral-900"
+      )}
+    >
       <div className="flex items-center justify-between pb-2">
         <div className="p-1">{language}</div>
         <Tooltip>
@@ -165,7 +172,11 @@ function MarkdownToSyntaxHighlighter({
               onClick={() => void copyToClipboard(flatChildren)}
               variant="ghost"
               size="icon"
-              className="hover:bg-neutral-200"
+              className={cn(
+                resolvedTheme !== "matrix"
+                  ? "hover:bg-neutral-200"
+                  : "hover:bg-[var(--sidebar-foreground)]"
+              )}
             >
               {!copiedText && <ClipboardIcon />}
               {!!copiedText && <ClipboardCheckIcon />}
@@ -178,7 +189,11 @@ function MarkdownToSyntaxHighlighter({
       </div>
       <SyntaxHighlighter
         language={language}
-        style={theme === "light" ? vs : stackoverflowDark}
+        style={
+          resolvedTheme === "dark" || resolvedTheme === "matrix"
+            ? stackoverflowDark
+            : vs
+        }
         customStyle={{
           borderRadius: "calc(var(--radius)",
         }}
