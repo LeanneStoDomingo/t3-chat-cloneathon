@@ -21,14 +21,11 @@ import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
-} from "./ui/context-menu";
+} from "~/components/ui/context-menu";
 import { Switch } from "~/components/ui/switch";
-import { useMatrixMode } from "~/hooks/use-matrix-mode";
 
 export function ThemeToggle({ className }: { className?: string }) {
   const { theme, setTheme } = useTheme();
-
-  const { matrixMode, setMatrixMode } = useMatrixMode();
 
   return (
     <ContextMenu>
@@ -71,8 +68,8 @@ export function ThemeToggle({ className }: { className?: string }) {
           <PillIcon color="red" />
           <span>Matrix Mode</span>
           <Switch
-            checked={matrixMode}
-            onCheckedChange={setMatrixMode}
+            checked={theme === "matrix"}
+            onCheckedChange={(e) => setTheme(e ? "matrix" : "system")}
             onClick={(e) => e.stopPropagation()}
           />
         </ContextMenuItem>
