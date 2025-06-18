@@ -125,7 +125,7 @@ const TYPING_DELAY = 75;
 const DELETE_SPEED = 50;
 
 const TYPING_STRINGS = [
-  `Wake up, ${"username"}...`,
+  `Wake up...`,
   "The Matrix has you...",
   "Follow the white rabbit.",
 ] as const;

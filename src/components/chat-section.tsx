@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAction } from "convex/react";
 import { useThreadMessages, toUIMessages } from "@convex-dev/agent/react";
@@ -31,11 +31,45 @@ import { useCopyToClipboard } from "~/hooks/use-copy-to-clipboard";
 import { modelStrings, type TChatModels } from "~/lib/chat-models";
 import { cn } from "~/lib/utils";
 import { useTheme } from "next-themes";
+import { useEventListener } from "usehooks-ts";
 
 export function ChatSection(props: { threadId: string | null }) {
+  const divRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [model, setModel] = useState<TChatModels>("gemini");
+
+  useEventListener(
+    "click",
+    () => {
+      inputRef.current?.focus();
+    },
+    divRef
+  );
+
+  return (
+    <div className="w-full flex flex-col" ref={divRef}>
+      {!!props.threadId && (
+        <ChatMessages threadId={props.threadId} model={model} />
+      )}
+      <PromptForm
+        threadId={props.threadId}
+        model={model}
+        setModel={setModel}
+        inputRef={inputRef}
+      />
+    </div>
+  );
+}
+
+function PromptForm(props: {
+  threadId: string | null;
+  model: TChatModels;
+  setModel: (m: TChatModels) => void;
+  inputRef: React.Ref<HTMLInputElement> | null;
+}) {
   const router = useRouter();
 
-  const [model, setModel] = useState<TChatModels>("gemini");
+  const { theme } = useTheme();
 
   const sendMessage = useAction(api.chat.sendMessage);
 
@@ -47,49 +81,71 @@ export function ChatSection(props: { threadId: string | null }) {
 
     e.currentTarget.reset();
 
-    void sendMessage({ model, prompt, threadId: props.threadId }).then(
-      (data) => {
-        if (props.threadId) return;
-        router.push(`/chat/${data.threadId}`);
-      }
-    );
+    void sendMessage({
+      model: props.model,
+      prompt,
+      threadId: props.threadId,
+    }).then((data) => {
+      if (props.threadId) return;
+      router.push(`/chat/${data.threadId}`);
+    });
   };
 
   return (
-    <div className="w-full flex flex-col">
-      {!!props.threadId && (
-        <ChatMessages threadId={props.threadId} model={model} />
+    <form
+      onSubmit={onSubmit}
+      className={cn(
+        "flex flex-col gap-4",
+        theme !== "matrix" && "bottom-0 mt-auto p-8",
+        theme === "matrix" && " p-4"
       )}
-      <form
-        onSubmit={onSubmit}
-        className="flex flex-col p-8 gap-4 bottom-0 mt-auto"
+    >
+      <div className={cn("flex items-center", theme === "matrix" && "p-4")}>
+        {theme === "matrix" ? <div>{`>`}</div> : null}
+        <Input
+          name="prompt"
+          className={cn(
+            "grow",
+            theme === "matrix" &&
+              "border-0 border-black shadow-none focus-visible:border-ring focus-visible:ring-0"
+          )}
+          autoComplete="off"
+          ref={props.inputRef}
+        />
+      </div>
+      <div
+        className={cn(
+          "flex justify-between",
+          theme === "matrix" && "bottom-0 mt-auto absolute pb-4"
+        )}
       >
-        <Input name="prompt" className="grow" autoComplete="off" />
-        <div className="flex justify-between">
-          <Select
-            name="model"
-            value={model}
-            onValueChange={(v) => setModel(v as TChatModels)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Model" />
-            </SelectTrigger>
-            <SelectContent>
-              {modelStrings.map((m) => (
-                <SelectItem key={m.value} value={m.value}>
-                  {m.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button type="submit">Send</Button>
-        </div>
-      </form>
-    </div>
+        <Select
+          name="model"
+          value={props.model}
+          onValueChange={(v) => props.setModel(v as TChatModels)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Model" />
+          </SelectTrigger>
+          <SelectContent>
+            {modelStrings.map((m) => (
+              <SelectItem key={m.value} value={m.value}>
+                {m.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button type="submit" className={cn(theme === "matrix" && "hidden")}>
+          Send
+        </Button>
+      </div>
+    </form>
   );
 }
 
 function ChatMessages(props: { threadId: string; model: TChatModels }) {
+  const { theme } = useTheme();
+
   const messages = useThreadMessages(
     api.chat.listThreadMessages,
     { threadId: props.threadId, model: props.model },
@@ -104,11 +160,13 @@ function ChatMessages(props: { threadId: string; model: TChatModels }) {
         <div
           key={m.key}
           className={cn(
-            "p-4",
-            m.role === "user" &&
+            "p-4 flex gap-2",
+            theme !== "matrix" &&
+              m.role === "user" &&
               "bg-neutral-100 ml-auto rounded-lg dark:bg-neutral-800"
           )}
         >
+          {theme === "matrix" ? <div>{">"}</div> : null}
           <Markdown
             options={{
               overrides: {
