@@ -44,7 +44,7 @@ import { useTheme } from "next-themes";
 export function AppSidebar() {
   return (
     <Sidebar>
-      <SidebarHeader className="text-center gap-4">
+      <SidebarHeader className="gap-4 text-center">
         <div>T3 Chat Cloneathon</div>
         <Authenticated>
           <Button className="w-full" asChild>
@@ -87,7 +87,7 @@ function ChatGroup() {
   const threads = usePaginatedQuery(
     api.chat.listThreads,
     {},
-    { initialNumItems: 20 }
+    { initialNumItems: 20 },
   );
 
   return (
@@ -104,7 +104,7 @@ function ChatGroup() {
                   params.threadId === thread._id &&
                     (theme !== "matrix"
                       ? "bg-neutral-200 hover:bg-neutral-200 dark:bg-neutral-700 dark:hover:bg-neutral-700"
-                      : "hover:bg-[var(--sidebar-foreground)] text-black font-light  bg-[var(--sidebar-foreground)]")
+                      : "bg-[var(--sidebar-foreground)] font-light text-black hover:bg-[var(--sidebar-foreground)]"),
                 )}
               >
                 <Link href={`/chat/${thread._id}`}>{thread.title}</Link>
@@ -157,7 +157,7 @@ function ChatGroup() {
                       void deleteThread({ threadId: thread._id }).then(
                         (data) => {
                           if (data.isDone) router.push("/");
-                        }
+                        },
                       );
                     }}
                   >

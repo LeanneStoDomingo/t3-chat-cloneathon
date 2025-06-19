@@ -135,12 +135,12 @@ const TYPING_TIME = TYPING_STRINGS.reduce(
     accumulator +
     currentValue.length * (TYPING_DELAY + DELETE_SPEED) +
     PAUSE_DELAY,
-  0
+  0,
 );
 
 function ConsoleTyping() {
   return (
-    <div className="absolute top-0 left-0 z-11 w-full h-full bg-black p-20">
+    <div className="absolute top-0 left-0 z-11 h-full w-full bg-black p-20">
       <Typewriter
         onInit={(typewriter) => {
           typewriter
@@ -163,7 +163,7 @@ function ConsoleTyping() {
 function Matrix() {
   // TODO: tailwindcss opacity animation
   return (
-    <div className="absolute top-0 left-0 z-11 w-full h-full bg-black">
+    <div className="absolute top-0 left-0 z-11 h-full w-full bg-black">
       <MatrixRainingLetters custom_class="m-0 p-0" />
     </div>
   );

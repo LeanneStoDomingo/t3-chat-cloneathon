@@ -9,11 +9,11 @@ const nextConfig = {
   async redirects() {
     return [
       {
-        source: '/chat',
-        destination: '/',
+        source: "/chat",
+        destination: "/",
         permanent: true,
       },
-    ]
+    ];
   },
   async rewrites() {
     return [
@@ -32,7 +32,7 @@ const nextConfig = {
     ];
   },
   // This is required to support PostHog trailing slash API requests
-  skipTrailingSlashRedirect: true, 
+  skipTrailingSlashRedirect: true,
   eslint: {
     ignoreDuringBuilds: true,
   },

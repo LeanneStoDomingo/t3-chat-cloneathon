@@ -38,7 +38,7 @@ export function ChatSection(props: { threadId: string | null }) {
   const [model, setModel] = useState<TChatModels>("gemini");
 
   return (
-    <div className="w-full flex flex-col" ref={divRef}>
+    <div className="flex w-full flex-col" ref={divRef}>
       {!!props.threadId && (
         <ChatMessages threadId={props.threadId} model={model} />
       )}
@@ -69,7 +69,7 @@ function PromptForm(props: {
     () => {
       inputRef.current?.focus();
     },
-    props.divRef as React.RefObject<HTMLDivElement>
+    props.divRef as React.RefObject<HTMLDivElement>,
   );
 
   const sendMessage = useAction(api.chat.sendMessage);
@@ -98,7 +98,7 @@ function PromptForm(props: {
       className={cn(
         "flex flex-col gap-4",
         theme !== "matrix" && "bottom-0 mt-auto p-8",
-        theme === "matrix" && " p-4"
+        theme === "matrix" && "p-4",
       )}
     >
       <div className={cn("flex items-center", theme === "matrix" && "p-4")}>
@@ -108,7 +108,7 @@ function PromptForm(props: {
           className={cn(
             "grow",
             theme === "matrix" &&
-              "border-0 border-black shadow-none focus-visible:border-ring focus-visible:ring-0"
+              "focus-visible:border-ring border-0 border-black shadow-none focus-visible:ring-0",
           )}
           autoComplete="off"
           ref={inputRef}
@@ -117,7 +117,7 @@ function PromptForm(props: {
       <div
         className={cn(
           "flex justify-between",
-          theme === "matrix" && "bottom-0 mt-auto absolute pb-4"
+          theme === "matrix" && "absolute bottom-0 mt-auto pb-4",
         )}
       >
         <Select
@@ -150,21 +150,21 @@ function ChatMessages(props: { threadId: string; model: TChatModels }) {
   const messages = useThreadMessages(
     api.chat.listThreadMessages,
     { threadId: props.threadId, model: props.model },
-    { initialNumItems: 10, stream: true }
+    { initialNumItems: 10, stream: true },
   );
 
   if (messages.results.length === 0) return;
 
   return (
-    <div className="flex flex-col p-4 gap-2">
+    <div className="flex flex-col gap-2 p-4">
       {toUIMessages(messages.results).map((m) => (
         <div
           key={m.key}
           className={cn(
-            "p-4 flex gap-2",
+            "flex gap-2 p-4",
             theme !== "matrix" &&
               m.role === "user" &&
-              "bg-neutral-100 ml-auto rounded-lg dark:bg-neutral-800"
+              "ml-auto rounded-lg bg-neutral-100 dark:bg-neutral-800",
           )}
         >
           {theme === "matrix" ? <div>{">"}</div> : null}
@@ -217,10 +217,10 @@ function MarkdownToSyntaxHighlighter({
   return (
     <div
       className={cn(
-        "p-2 rounded-md my-2",
+        "my-2 rounded-md p-2",
         resolvedTheme !== "matrix"
           ? "bg-neutral-100 dark:bg-neutral-800"
-          : "bg-neutral-900"
+          : "bg-neutral-900",
       )}
     >
       <div className="flex items-center justify-between pb-2">
@@ -234,7 +234,7 @@ function MarkdownToSyntaxHighlighter({
               className={cn(
                 resolvedTheme !== "matrix"
                   ? "hover:bg-neutral-200"
-                  : "hover:bg-[var(--sidebar-foreground)]"
+                  : "hover:bg-[var(--sidebar-foreground)]",
               )}
             >
               {!copiedText && <ClipboardIcon />}

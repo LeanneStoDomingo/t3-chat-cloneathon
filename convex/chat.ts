@@ -31,7 +31,7 @@ export const listThreads = query({
 
     const threads = await ctx.runQuery(
       components.agent.threads.listThreadsByUserId,
-      { userId: user.tokenIdentifier, paginationOpts: args.paginationOpts }
+      { userId: user.tokenIdentifier, paginationOpts: args.paginationOpts },
     );
 
     return threads;
@@ -88,7 +88,7 @@ async function getThread(
   ctx: ActionCtx,
   userId: string,
   model: TChatModels,
-  threadId: string | null
+  threadId: string | null,
 ) {
   const agent = getModelAgent(model);
 
@@ -127,7 +127,7 @@ export const generateThreadTitle = internalAction({
           The title should be no more than 35 characters long. 
           Strip the ends of whitespace and don't include quotes`,
       },
-      { storageOptions: { saveMessages: "none" } }
+      { storageOptions: { saveMessages: "none" } },
     );
 
     await thread.updateMetadata({ title: title.text });
@@ -138,7 +138,7 @@ async function updateThreadTitle(
   ctx: MutationCtx | ActionCtx,
   thread: Thread<ToolSet>,
   userId: string,
-  model: TChatModels
+  model: TChatModels,
 ) {
   const metadata = await thread.getMetadata();
   if (metadata.title !== NEW_THREAD_TITLE) return;
@@ -162,7 +162,7 @@ export const streamMessage = internalAction({
 
     const result = await thread.streamText(
       { prompt: args.prompt },
-      { saveStreamDeltas: true }
+      { saveStreamDeltas: true },
     );
 
     await result.consumeStream();
@@ -183,7 +183,7 @@ export const sendMessage = action({
       ctx,
       user.tokenIdentifier,
       args.model,
-      args.threadId
+      args.threadId,
     );
 
     await ctx.scheduler.runAfter(0, internal.chat.streamMessage, {
@@ -219,7 +219,7 @@ export const deleteThread = mutation({
   handler: async (ctx, args) => {
     return await ctx.runMutation(
       components.agent.threads.deleteAllForThreadIdAsync,
-      args
+      args,
     );
   },
 });
