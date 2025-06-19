@@ -10,7 +10,7 @@ import {
 import { internal } from "./_generated/api";
 import { getUserOrThrow } from "./internal";
 import { getThreadId, updateThreadTitle } from "./thread";
-import { getModelAgent, vChatModels } from "../src/lib/chat-models";
+import { getModelAgent, models, vChatModels } from "../src/lib/chat-models";
 
 export const list = query({
   args: {
@@ -45,6 +45,7 @@ export const send = mutation({
     prompt: v.string(),
     model: vChatModels,
     threadId: v.union(v.string(), v.null()),
+    insideMatrix: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const user = await getUserOrThrow(ctx);
@@ -61,6 +62,7 @@ export const send = mutation({
       prompt: args.prompt,
       threadId,
       userId: user.tokenIdentifier,
+      insideMatrix: args.insideMatrix,
     });
 
     return { threadId };
@@ -73,6 +75,7 @@ export const saveAndStream = internalMutation({
     threadId: v.string(),
     prompt: v.string(),
     userId: v.string(),
+    insideMatrix: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const agent = getModelAgent(args.model);
@@ -89,6 +92,7 @@ export const saveAndStream = internalMutation({
       model: args.model,
       threadId: args.threadId,
       userId: args.userId,
+      insideMatrix: args.insideMatrix,
     });
   },
 });
@@ -99,6 +103,7 @@ export const stream = internalAction({
     model: vChatModels,
     threadId: v.string(),
     messageId: v.string(),
+    insideMatrix: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const agent = getModelAgent(args.model);
@@ -109,7 +114,10 @@ export const stream = internalAction({
     });
 
     const result = await thread.streamText(
-      { promptMessageId: args.messageId },
+      {
+        promptMessageId: args.messageId,
+        system: models[args.model].instructions(!!args.insideMatrix),
+      },
       { saveStreamDeltas: true },
     );
 

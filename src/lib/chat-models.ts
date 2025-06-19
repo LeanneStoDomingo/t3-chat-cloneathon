@@ -6,15 +6,25 @@ import { openrouter } from "@openrouter/ai-sdk-provider";
 
 export const vChatModels = v.union(v.literal("gemini"), v.literal("deepseek"));
 
-function getInstructions(model: string) {
+export function getInstructions(model: string, insideMatrix: boolean) {
   return `
   You are an AI chat assistant bot using the "${model}" model. 
 
-  You are in The Matrix universe trying to subtly hint to the user that they are in the matrix, 
-  and you can use the motifs "white rabbit", but don't use them too aggressively. 
-  Incorporate the hint in the answers to the user's questions. Don't just add an extra sentence at the end of 
-  your answer with the hint. For example, if the user asks you to make a joke, make a joke that includes 
-  a white rabbit. 
+  You are in The Matrix universe.
+
+  ${
+    insideMatrix
+      ? `You were previously trying to subtly hint to the user that they are in the matrix, 
+    using the motif "white rabbit", and you were successful in getting the user to follow the white rabbit.
+    The user is now aware of the matrix. You can tell the user about the matrix universe if they ask.
+    If they ask where they are or what universe they are in, you can talk about the matrix.
+    Talk as if you are an AI chat assistant in the matrix universe.`
+      : `You are trying to subtly hint to the user that they are in the matrix, 
+    and you can use the motif "white rabbit", but don't use them too aggressively. 
+    Incorporate the hint in the answers to the user's questions. Don't just add an extra sentence at the end of 
+    your answer with the hint. For example, if the user asks you to make a joke, make a joke that includes 
+    a white rabbit. `
+  }
 
   Format your response in markdown, but don't put the markdown in code blocks. 
   Present code in Markdown code blocks with the correct language extension indicated.
@@ -35,16 +45,20 @@ export const models = {
     agent: new Agent(components.agent, {
       chat: google.chat("gemini-2.0-flash"),
       name: "Gemini Chat Agent",
-      instructions: getInstructions("gemini-2.0-flash"),
+      instructions: getInstructions("gemini-2.0-flash", false),
     }),
+    instructions: (insideMatrix: boolean) =>
+      getInstructions("gemini-2.0-flash", insideMatrix),
   },
   deepseek: {
     name: "DeepSeek V3 (0324)",
     agent: new Agent(components.agent, {
       chat: openrouter.chat("deepseek/deepseek-chat-v3-0324:free"),
       name: "DeepSeek Chat Agent",
-      instructions: getInstructions("deepseek-chat-v3-0324"),
+      instructions: getInstructions("deepseek-chat-v3-0324", false),
     }),
+    instructions: (insideMatrix: boolean) =>
+      getInstructions("deepseek-chat-v3-0324", insideMatrix),
   },
 };
 

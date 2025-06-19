@@ -92,6 +92,7 @@ function PromptForm(props: {
       model: props.model,
       prompt,
       threadId: props.threadId,
+      insideMatrix: isMatrixTheme,
     }).then((data) => {
       if (props.threadId) return;
       router.push(`/chat/${data.threadId}`);
