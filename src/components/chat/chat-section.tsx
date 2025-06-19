@@ -19,6 +19,7 @@ import { cn } from "~/lib/utils";
 import { useTheme } from "next-themes";
 import { useEventListener } from "usehooks-ts";
 import { ChatMessages, Message } from "./chat-messages";
+import posthog from "posthog-js";
 
 export function ChatSection(props: { threadId: string | null }) {
   const divRef = useRef<HTMLDivElement>(null);
@@ -94,6 +95,13 @@ function PromptForm(props: {
       threadId: props.threadId,
       insideMatrix: isMatrixTheme,
     }).then((data) => {
+      posthog.capture("Send Message", {
+        model: props.model,
+        prompt,
+        threadId: props.threadId,
+        insideMatrix: isMatrixTheme,
+        newChat: !props.threadId,
+      });
       if (props.threadId) return;
       router.push(`/chat/${data.threadId}`);
     });

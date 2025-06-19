@@ -27,6 +27,7 @@ import {
   ContextMenuTrigger,
 } from "~/components/ui/context-menu";
 import { Switch } from "~/components/ui/switch";
+import posthog from "posthog-js";
 
 export function ThemeToggle({ className }: { className?: string }) {
   const router = useRouter();
@@ -112,6 +113,7 @@ export function ThemeToggle({ className }: { className?: string }) {
               onCheckedChange={(e) => {
                 setShowMatrixRain(e);
                 setTheme(e ? "matrix" : "system");
+                posthog.capture("Matrix Theme", { enable: e });
               }}
             />
           </ContextMenuItem>
