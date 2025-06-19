@@ -35,16 +35,7 @@ import { useEventListener } from "usehooks-ts";
 
 export function ChatSection(props: { threadId: string | null }) {
   const divRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const [model, setModel] = useState<TChatModels>("gemini");
-
-  useEventListener(
-    "click",
-    () => {
-      inputRef.current?.focus();
-    },
-    divRef
-  );
 
   return (
     <div className="w-full flex flex-col" ref={divRef}>
@@ -55,7 +46,7 @@ export function ChatSection(props: { threadId: string | null }) {
         threadId={props.threadId}
         model={model}
         setModel={setModel}
-        inputRef={inputRef}
+        divRef={divRef}
       />
     </div>
   );
@@ -65,11 +56,21 @@ function PromptForm(props: {
   threadId: string | null;
   model: TChatModels;
   setModel: (m: TChatModels) => void;
-  inputRef: React.Ref<HTMLInputElement> | null;
+  divRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const router = useRouter();
 
   const { theme } = useTheme();
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEventListener(
+    "click",
+    () => {
+      inputRef.current?.focus();
+    },
+    props.divRef as React.RefObject<HTMLDivElement>
+  );
 
   const sendMessage = useAction(api.chat.sendMessage);
 
@@ -110,7 +111,7 @@ function PromptForm(props: {
               "border-0 border-black shadow-none focus-visible:border-ring focus-visible:ring-0"
           )}
           autoComplete="off"
-          ref={props.inputRef}
+          ref={inputRef}
         />
       </div>
       <div
