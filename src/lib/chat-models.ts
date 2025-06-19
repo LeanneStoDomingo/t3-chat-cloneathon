@@ -31,7 +31,7 @@ export const models = {
     }),
   },
   deepseek: {
-    name: "DeepSeek v3 (0324)",
+    name: "DeepSeek V3 (0324)",
     agent: new Agent(components.agent, {
       chat: openrouter.chat("deepseek/deepseek-chat-v3-0324:free"),
       name: "DeepSeek Chat Agent",
@@ -46,3 +46,7 @@ export const modelStrings = Object.entries(models).map(([k, v]) => ({
 }));
 
 export type TChatModels = keyof typeof models;
+
+export function getModelAgent(model: TChatModels) {
+  return models[model].agent;
+}

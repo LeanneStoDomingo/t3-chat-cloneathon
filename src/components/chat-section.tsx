@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useAction } from "convex/react";
+import { useMutation } from "convex/react";
 import { useThreadMessages, toUIMessages } from "@convex-dev/agent/react";
 import { api } from "../../convex/_generated/api";
 import Markdown from "markdown-to-jsx";
@@ -72,7 +72,7 @@ function PromptForm(props: {
     props.divRef as React.RefObject<HTMLDivElement>,
   );
 
-  const sendMessage = useAction(api.chat.sendMessage);
+  const sendMessage = useMutation(api.message.send);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -148,7 +148,7 @@ function ChatMessages(props: { threadId: string; model: TChatModels }) {
   const { theme } = useTheme();
 
   const messages = useThreadMessages(
-    api.chat.listThreadMessages,
+    api.message.list,
     { threadId: props.threadId, model: props.model },
     { initialNumItems: 10, stream: true },
   );
@@ -167,7 +167,7 @@ function ChatMessages(props: { threadId: string; model: TChatModels }) {
               "ml-auto rounded-lg bg-neutral-100 dark:bg-neutral-800",
           )}
         >
-          {theme === "matrix" ? <div>{">"}</div> : null}
+          {theme === "matrix" && m.role === "user" ? <div>{">"}</div> : null}
           <Markdown
             options={{
               overrides: {

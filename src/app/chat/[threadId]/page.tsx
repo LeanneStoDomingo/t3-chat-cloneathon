@@ -10,7 +10,7 @@ export default function Thread() {
   const params = useParams<{ threadId: string }>();
   const router = useRouter();
 
-  const doesThreadExist = useQuery(api.chat.checkIfThreadExists, {
+  const doesThreadExist = useQuery(api.thread.exists, {
     threadId: params.threadId,
   });
 

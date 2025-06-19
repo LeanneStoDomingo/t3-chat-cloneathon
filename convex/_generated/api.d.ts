@@ -8,7 +8,9 @@
  * @module
  */
 
-import type * as chat from "../chat.js";
+import type * as internal_ from "../internal.js";
+import type * as message from "../message.js";
+import type * as thread from "../thread.js";
 
 import type {
   ApiFromModules,
@@ -25,7 +27,9 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
-  chat: typeof chat;
+  internal: typeof internal_;
+  message: typeof message;
+  thread: typeof thread;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 

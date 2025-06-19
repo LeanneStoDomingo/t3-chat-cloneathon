@@ -81,11 +81,11 @@ function ChatGroup() {
   const isMobile = useIsMobile();
   const { theme } = useTheme();
 
-  const archiveThread = useMutation(api.chat.archiveThread);
-  const deleteThread = useMutation(api.chat.deleteThread);
+  const archiveThread = useMutation(api.thread.archive);
+  const deleteThread = useMutation(api.thread.deleteById);
 
   const threads = usePaginatedQuery(
-    api.chat.listThreads,
+    api.thread.list,
     {},
     { initialNumItems: 20 },
   );
