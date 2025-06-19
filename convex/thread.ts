@@ -101,7 +101,8 @@ export const generateTitle = internalAction({
       {
         prompt: `Generate a single title for this thread in plain text. 
           The title should be no more than 35 characters long. 
-          Strip the ends of whitespace and don't include quotes`,
+          Strip the ends of whitespace and don't include quotes.
+          Do not include the word "thread" if it is not pertinent to the conversation.`,
       },
       { storageOptions: { saveMessages: "none" } },
     );
