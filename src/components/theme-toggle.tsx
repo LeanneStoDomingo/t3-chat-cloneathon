@@ -31,12 +31,13 @@ import { Switch } from "~/components/ui/switch";
 export function ThemeToggle({ className }: { className?: string }) {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
+  const isMatrixTheme = theme === "matrix";
 
   const [showTyping, setShowTyping] = useState(false);
   const [showMatrixRain, setShowMatrixRain] = useState(false);
 
   useEffect(() => {
-    if (theme !== "matrix") return;
+    if (!isMatrixTheme) return;
 
     const RAIN_TIME = 5000;
 
@@ -54,7 +55,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       clearTimeout(showMatrixRainTimeout);
       clearTimeout(showTypingTimeout);
     };
-  }, [theme, router]);
+  }, [router, isMatrixTheme]);
 
   return (
     <>
@@ -100,14 +101,14 @@ export function ThemeToggle({ className }: { className?: string }) {
         </ContextMenuTrigger>
         <ContextMenuContent>
           <ContextMenuItem>
-            {theme === "matrix" ? (
+            {isMatrixTheme ? (
               <BedDoubleIcon />
             ) : (
               <RabbitIcon color="gray" fill="white" />
             )}
-            <span>{theme === "matrix" ? "Got to sleep" : "Wake up..."}</span>
+            <span>{isMatrixTheme ? "Got to sleep" : "Wake up..."}</span>
             <Switch
-              checked={theme === "matrix"}
+              checked={isMatrixTheme}
               onCheckedChange={(e) => {
                 setShowMatrixRain(e);
                 setTheme(e ? "matrix" : "system");

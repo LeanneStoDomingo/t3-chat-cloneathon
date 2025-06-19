@@ -74,6 +74,7 @@ function PromptForm(props: {
   const router = useRouter();
 
   const { theme } = useTheme();
+  const isMatrixTheme = theme === "matrix";
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -120,17 +121,17 @@ function PromptForm(props: {
       onSubmit={onSubmit}
       className={cn(
         "flex flex-col gap-4",
-        theme !== "matrix" && "bottom-0 mt-auto p-8",
-        theme === "matrix" && "p-4",
+        !isMatrixTheme && "bottom-0 mt-auto p-8",
+        isMatrixTheme && "p-4",
       )}
     >
-      <div className={cn("flex items-center", theme === "matrix" && "p-4")}>
-        {theme === "matrix" ? <div>{`>`}</div> : null}
+      <div className={cn("flex items-center", isMatrixTheme && "p-4")}>
+        {isMatrixTheme ? <div>{`>`}</div> : null}
         <Input
           name="prompt"
           className={cn(
             "grow",
-            theme === "matrix" &&
+            isMatrixTheme &&
               "focus-visible:border-ring border-0 border-black shadow-none focus-visible:ring-0",
           )}
           autoComplete="off"
@@ -140,7 +141,7 @@ function PromptForm(props: {
       <div
         className={cn(
           "flex justify-between",
-          theme === "matrix" && "absolute bottom-0 mt-auto pb-4",
+          isMatrixTheme && "absolute bottom-0 mt-auto pb-4",
         )}
       >
         <Select
@@ -159,7 +160,7 @@ function PromptForm(props: {
             ))}
           </SelectContent>
         </Select>
-        <Button type="submit" className={cn(theme === "matrix" && "hidden")}>
+        <Button type="submit" className={cn(isMatrixTheme && "hidden")}>
           Send
         </Button>
       </div>
@@ -190,17 +191,18 @@ function Message(props: {
   content: UIMessage["content"];
 }) {
   const { theme } = useTheme();
+  const isMatrixTheme = theme === "matrix";
 
   return (
     <div
       className={cn(
         "flex gap-2 p-4",
-        theme !== "matrix" &&
+        !isMatrixTheme &&
           props.role === "user" &&
           "ml-auto rounded-lg bg-neutral-100 dark:bg-neutral-800",
       )}
     >
-      {theme === "matrix" && props.role === "user" ? <div>{">"}</div> : null}
+      {isMatrixTheme && props.role === "user" ? <div>{">"}</div> : null}
       <Markdown
         options={{
           overrides: {
@@ -279,11 +281,7 @@ function MarkdownToSyntaxHighlighter({
       </div>
       <SyntaxHighlighter
         language={language}
-        style={
-          resolvedTheme === "dark" || resolvedTheme === "matrix"
-            ? stackoverflowDark
-            : vs
-        }
+        style={resolvedTheme === "light" ? vs : stackoverflowDark}
         customStyle={{
           borderRadius: "calc(var(--radius)",
         }}
