@@ -25,9 +25,9 @@ export async function getThreadId(
   model: TChatModels,
   threadId: string | null,
 ) {
-  const agent = getModelAgent(model);
-
   if (threadId) return threadId;
+
+  const agent = getModelAgent(model);
 
   const thread = await agent.createThread(ctx, {
     userId,
@@ -35,29 +35,6 @@ export async function getThreadId(
   });
 
   return thread.threadId;
-}
-
-export async function getThread(
-  ctx: ActionCtx,
-  userId: string,
-  model: TChatModels,
-  threadId: string | null,
-) {
-  const agent = getModelAgent(model);
-
-  if (!threadId) {
-    const { thread } = await agent.createThread(ctx, {
-      userId,
-      title: NEW_THREAD_TITLE,
-    });
-    return thread;
-  }
-
-  const { thread } = await agent.continueThread(ctx, {
-    threadId,
-    userId,
-  });
-  return thread;
 }
 
 export async function updateThreadTitle(

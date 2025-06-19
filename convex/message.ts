@@ -1,10 +1,15 @@
 import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 import { vStreamArgs } from "@convex-dev/agent";
-import { internalAction, mutation, query } from "./_generated/server";
+import {
+  internalAction,
+  internalMutation,
+  mutation,
+  query,
+} from "./_generated/server";
 import { internal } from "./_generated/api";
 import { getUserOrThrow } from "./internal";
-import { getThread, getThreadId, updateThreadTitle } from "./thread";
+import { getThreadId, updateThreadTitle } from "./thread";
 import { getModelAgent, vChatModels } from "../src/lib/chat-models";
 
 export const list = query({
@@ -35,26 +40,6 @@ export const list = query({
   },
 });
 
-export const stream = internalAction({
-  args: {
-    userId: v.string(),
-    model: vChatModels,
-    threadId: v.string(),
-    prompt: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const thread = await getThread(ctx, args.userId, args.model, args.threadId);
-
-    const result = await thread.streamText(
-      { prompt: args.prompt },
-      { saveStreamDeltas: true },
-    );
-
-    await result.consumeStream();
-    await updateThreadTitle(ctx, thread, args.userId, args.model);
-  },
-});
-
 export const send = mutation({
   args: {
     prompt: v.string(),
@@ -71,13 +56,64 @@ export const send = mutation({
       args.threadId,
     );
 
-    await ctx.scheduler.runAfter(0, internal.message.stream, {
-      prompt: args.prompt,
+    await ctx.scheduler.runAfter(0, internal.message.saveAndStream, {
       model: args.model,
+      prompt: args.prompt,
       threadId,
       userId: user.tokenIdentifier,
     });
 
     return { threadId };
+  },
+});
+
+export const saveAndStream = internalMutation({
+  args: {
+    model: vChatModels,
+    threadId: v.string(),
+    prompt: v.string(),
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const agent = getModelAgent(args.model);
+
+    const { messageId } = await agent.saveMessage(ctx, {
+      threadId: args.threadId,
+      prompt: args.prompt,
+      userId: args.userId,
+      skipEmbeddings: true,
+    });
+
+    await ctx.scheduler.runAfter(0, internal.message.stream, {
+      messageId,
+      model: args.model,
+      threadId: args.threadId,
+      userId: args.userId,
+    });
+  },
+});
+
+export const stream = internalAction({
+  args: {
+    userId: v.string(),
+    model: vChatModels,
+    threadId: v.string(),
+    messageId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const agent = getModelAgent(args.model);
+
+    const { thread } = await agent.continueThread(ctx, {
+      threadId: args.threadId,
+      userId: args.userId,
+    });
+
+    const result = await thread.streamText(
+      { promptMessageId: args.messageId },
+      { saveStreamDeltas: true },
+    );
+
+    await result.consumeStream();
+    await updateThreadTitle(ctx, thread, args.userId, args.model);
   },
 });
